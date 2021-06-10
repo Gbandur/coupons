@@ -5,9 +5,11 @@ namespace App\Models;
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * App\Models\Coupon
@@ -45,6 +47,8 @@ use Illuminate\Support\Carbon;
  */
 class Coupon extends Model
 {
+    use HasFactory;
+
     protected $table = 'coupons';
     public $timestamps = false;
 
@@ -75,6 +79,10 @@ class Coupon extends Model
         'end_date'
     ];
 
+    const TYPE_FIXED = 1;
+    const TYPE_PERCENT = 2;
+    const TYPE_GIFT = 3;
+
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'coupon_items', 'coupon_id', 'product_id')
@@ -85,5 +93,26 @@ class Coupon extends Model
     {
         return $this->belongsToMany(Product::class, 'coupon_items', 'coupon_id', 'product_id')
             ->withPivot(['is_present'])->wherePivot('is_present', true);
+    }
+
+    public function getAllCoupons()
+    {
+        return $this->paginate(15);
+    }
+
+    public function getUsedCouponCount()
+    {
+        return $this->sum('usage_count');
+    }
+
+    public function discount($total)
+    {
+        if ($this->type === self::TYPE_FIXED) {
+            return $this->value;
+        } elseif ($this->type === self::TYPE_PERCENT) {
+            return ($this->value / 100) * $total;
+        } else {
+            return 0;
+        }
     }
 }

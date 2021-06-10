@@ -14,5 +14,17 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('layouts.app');
 });
+
+Route::middleware('auth')->prefix('/coupons')->name('coupons.')->group(function (){
+    Route::get('/', [\App\Http\Controllers\Coupon\CouponController::class, 'index'])->name('index');
+    Route::post('/', [\App\Http\Controllers\Coupon\CouponController::class, 'store'])->name('store');
+    Route::post('/apply', [\App\Http\Controllers\Coupon\CouponController::class, 'apply'])->name('apply');
+    Route::put('/{coupon}/activate', [\App\Http\Controllers\Coupon\CouponController::class, 'activate'])->name('activate');
+    Route::put('/{coupon}/deactivate', [\App\Http\Controllers\Coupon\CouponController::class, 'deactivate'])->name('deactivate');
+});
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

@@ -17,3 +17,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::prefix('/coupons')->name('coupons.')->group(function (){
+    Route::get('/', [\App\Http\Controllers\Coupon\CouponController::class, 'index'])->name('index');
+    Route::post('/', [\App\Http\Controllers\Coupon\CouponController::class, 'store'])->name('store');
+});
+
